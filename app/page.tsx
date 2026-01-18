@@ -1,65 +1,92 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getLatestArticles } from "@/lib/api";
+import { CATEGORIES } from "@/lib/types";
+import ArticleCard from "@/components/ArticleCard";
 
-export default function Home() {
+export default async function HomePage() {
+  const { data: articles } = await getLatestArticles(12);
+
+  const featuredArticle = articles[0];
+  const remainingArticles = articles.slice(1);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <>
+      {/* Hero Section */}
+      <section className="border-b border-stone-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-stone-900 tracking-tight max-w-3xl">
+            Insights that matter for your career and growth
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg text-stone-600 max-w-2xl">
+            Stay informed with the latest opportunities, educational resources, and technology trends.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Categories */}
+      <section className="border-b border-stone-200 bg-stone-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <nav className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+            {CATEGORIES.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/category/${category.slug}`}
+                className="flex-shrink-0 px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 bg-white border border-stone-200 rounded-full hover:border-stone-300 transition-colors"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </nav>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {articles.length === 0 ? (
+          <div className="text-center py-12 sm:py-16">
+            <h2 className="text-lg sm:text-xl font-medium text-stone-900">No articles yet</h2>
+            <p className="mt-2 text-sm sm:text-base text-stone-600">Check back soon for new content.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
+            {/* Featured Article */}
+            <div className="lg:col-span-2">
+              <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">
+                Featured
+              </span>
+              <div className="mt-3 sm:mt-4">
+                <ArticleCard article={featuredArticle} featured />
+              </div>
+            </div>
+
+            {/* Latest Articles */}
+            <div className="lg:col-span-1">
+              <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">
+                Latest
+              </span>
+              <div className="mt-3 sm:mt-4 space-y-4 sm:space-y-6">
+                {remainingArticles.slice(0, 5).map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* More Articles Grid */}
+        {remainingArticles.length > 5 && (
+          <section className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-stone-200">
+            <h2 className="text-xs font-medium text-stone-500 uppercase tracking-wider">
+              More Stories
+            </h2>
+            <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {remainingArticles.slice(5).map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </>
   );
 }
